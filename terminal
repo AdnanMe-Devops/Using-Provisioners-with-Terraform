@@ -1,0 +1,162 @@
+bash-5.0$ cd terraformlab
+bash-5.0$ terraform init
+
+Initializing the backend...
+
+Initializing provider plugins...
+- Finding latest version of hashicorp/null...
+- Finding hashicorp/aws versions matching "3.7.*"...
+- Installing hashicorp/null v3.1.0...
+- Installed hashicorp/null v3.1.0 (self-signed, key ID 34365D9472D7468F)
+- Installing hashicorp/aws v3.7.0...
+- Installed hashicorp/aws v3.7.0 (self-signed, key ID 34365D9472D7468F)
+
+Partner and community providers are signed by their developers.
+If you'd like to know more about provider signing, you can read about it here:
+https://www.terraform.io/docs/plugins/signing.html
+
+The following providers do not have any version constraints in configuration,
+so the latest version was installed.
+
+To prevent automatic upgrades to new major versions that may contain breaking
+changes, we recommend adding version constraints in a required_providers block
+in your configuration, with the constraint strings suggested below.
+
+* hashicorp/null: version = "~> 3.1.0"
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+bash-5.0$ terraform apply
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_ecr_repository.ecr will be created
+  + resource "aws_ecr_repository" "ecr" {
+      + arn                  = (known after apply)
+      + id                   = (known after apply)
+      + image_tag_mutability = "MUTABLE"
+      + name                 = "catest"
+      + registry_id          = (known after apply)
+      + repository_url       = (known after apply)
+    }
+
+  # null_resource.image will be created
+  + resource "null_resource" "image" {
+      + id = (known after apply)
+    }
+
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+aws_ecr_repository.ecr: Creating...
+aws_ecr_repository.ecr: Creation complete after 0s [id=catest]
+null_resource.image: Creating...
+null_resource.image: Provisioning with 'local-exec'...
+null_resource.image (local-exec): Executing: ["/bin/sh" "-c" "       $(aws ecr get-login --region us-west-2 --no-include-email)\n       docker pull hello-world:latest\n       docker tag hello-world:latest 510937169387.dkr.ecr.us-west-2.amazonaws.com/catest\n       docker push 510937169387.dkr.ecr.us-west-2.amazonaws.com/catest:latest\n"]
+null_resource.image (local-exec): WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+null_resource.image (local-exec): WARNING! Your password will be stored unencrypted in /home/theia/.docker/config.json.
+null_resource.image (local-exec): Configure a credential helper to remove this warning. See
+null_resource.image (local-exec): https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+null_resource.image (local-exec): Login Succeeded
+null_resource.image (local-exec): latest: Pulling from library/hello-world
+null_resource.image (local-exec): 2db29710123e: Pulling fs layer
+null_resource.image (local-exec): 2db29710123e: Verifying Checksum
+null_resource.image (local-exec): 2db29710123e: Download complete
+null_resource.image (local-exec): 2db29710123e: Pull complete
+null_resource.image (local-exec): Digest: sha256:cc15c5b292d8525effc0f89cb299f1804f3a725c8d05e158653a563f15e4f685
+null_resource.image (local-exec): Status: Downloaded newer image for hello-world:latest
+null_resource.image (local-exec): docker.io/library/hello-world:latest
+null_resource.image (local-exec): The push refers to repository [510937169387.dkr.ecr.us-west-2.amazonaws.com/catest]
+null_resource.image (local-exec): e07ee1baac5f: Preparing
+null_resource.image (local-exec): e07ee1baac5f: Pushed
+null_resource.image (local-exec): latest: digest: sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4 size: 525
+null_resource.image: Creation complete after 4s [id=2946718389681226571]
+
+Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+bash-5.0$ terraform destroy
+
+Error: Duplicate resource "aws_ecr_repository" configuration
+
+  on main.tf line 42:
+  42: resource "aws_ecr_repository" "ecr" {
+
+A aws_ecr_repository resource named "ecr" was already declared at
+main.tf:14,1-36. Resource names must be unique per type in each module.
+
+bash-5.0$ terraform destroy
+aws_ecr_repository.ecr: Refreshing state... [id=catest]
+null_resource.image: Refreshing state... [id=2946718389681226571]
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  # aws_ecr_repository.ecr will be destroyed
+  - resource "aws_ecr_repository" "ecr" {
+      - arn                  = "arn:aws:ecr:us-west-2:510937169387:repository/catest" -> null
+      - id                   = "catest" -> null
+      - image_tag_mutability = "MUTABLE" -> null
+      - name                 = "catest" -> null
+      - registry_id          = "510937169387" -> null
+      - repository_url       = "510937169387.dkr.ecr.us-west-2.amazonaws.com/catest" -> null
+      - tags                 = {} -> null
+
+      - encryption_configuration {
+          - encryption_type = "AES256" -> null
+        }
+
+      - image_scanning_configuration {
+          - scan_on_push = false -> null
+        }
+    }
+
+  # null_resource.image will be destroyed
+  - resource "null_resource" "image" {
+      - id = "2946718389681226571" -> null
+    }
+
+Plan: 0 to add, 0 to change, 2 to destroy.
+
+Do you really want to destroy all resources?
+  Terraform will destroy all your managed infrastructure, as shown above.
+  There is no undo. Only 'yes' will be accepted to confirm.
+
+  Enter a value: yes 
+
+null_resource.image: Destroying... [id=2946718389681226571]
+null_resource.image: Destruction complete after 0s
+aws_ecr_repository.ecr: Destroying... [id=catest]
+aws_ecr_repository.ecr: Provisioning with 'local-exec'...
+aws_ecr_repository.ecr (local-exec): Executing: ["/bin/sh" "-c" "    $(aws ecr get-login --region us-west-2 --no-include-email)\n    docker pull 510937169387.dkr.ecr.us-west-2.amazonaws.com/catest:latest\n    docker save --output catest.tar 510937169387.dkr.ecr.us-west-2.amazonaws.com/catest:latest \n"]
+aws_ecr_repository.ecr (local-exec): WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+aws_ecr_repository.ecr (local-exec): WARNING! Your password will be stored unencrypted in /home/theia/.docker/config.json.
+aws_ecr_repository.ecr (local-exec): Configure a credential helper to remove this warning. See
+aws_ecr_repository.ecr (local-exec): https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+aws_ecr_repository.ecr (local-exec): Login Succeeded
+aws_ecr_repository.ecr (local-exec): latest: Pulling from catest
+aws_ecr_repository.ecr (local-exec): Digest: sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
+aws_ecr_repository.ecr (local-exec): Status: Image is up to date for 510937169387.dkr.ecr.us-west-2.amazonaws.com/catest:latest
+aws_ecr_repository.ecr (local-exec): 510937169387.dkr.ecr.us-west-2.amazonaws.com/catest:latest
+aws_ecr_repository.ecr: Destruction complete after 2s
+
+Destroy complete! Resources: 2 destroyed.
